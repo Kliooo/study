@@ -2,174 +2,210 @@
 
 #include "long_number.hpp"
 
-TEST(get_digits_number, check_positive) {
-    VBek::LongNumber x("12345");
-    ASSERT_EQ(5, x.get_digits_number())
-        << "Неправильно подсчитано количество разрядов в числе " << x;
+using IBusko::LongNumber;
+
+TEST(default_constructor, rank) {
+	LongNumber x;
+	ASSERT_EQ(1, x.get_digits_number())
+		<< "По умолчанию число инициализируется нулём и иметь один разряд едениц.";
 }
 
-TEST(get_digits_number, check_negative) {
-    VBek::LongNumber x("-1");
-    ASSERT_EQ(1, x.get_digits_number())
-        << "Неправильно подсчитано количество разрядов в числе " << x;
+TEST(default_constructor, sign) {
+	LongNumber x;
+	ASSERT_FALSE(x.is_negative())
+		<< "По умолчанию число инициализируется нулём и является неотрицательным.";
 }
 
-class LongNumberFixture : public testing::Test {
-public:
-    VBek::LongNumber zero = VBek::LongNumber("0");
-    VBek::LongNumber one_v1 = VBek::LongNumber("1");
-    VBek::LongNumber one_v2 = VBek::LongNumber("1");
-    VBek::LongNumber two = VBek::LongNumber("2");
-    VBek::LongNumber three = VBek::LongNumber("3");
-    VBek::LongNumber five = VBek::LongNumber("5");
-    VBek::LongNumber six = VBek::LongNumber("6");
-    VBek::LongNumber twelve = VBek::LongNumber("12");
-    VBek::LongNumber negative_one_v1 = VBek::LongNumber("-1");
-    VBek::LongNumber negative_two = VBek::LongNumber("-2");
-    VBek::LongNumber negative_five = VBek::LongNumber("-5");
-    VBek::LongNumber big_number = VBek::LongNumber("123456789101112131415");
+TEST(default_constructor, value) {
+	LongNumber x;
+	ASSERT_EQ(0, x.get_rank_number(1))
+		<< "По умолчанию число инициализируется нулём.";
+}
+
+TEST(constructor, default_) {
+	LongNumber x;
+	EXPECT_FALSE(x.is_negative())
+		<< "По умолчанию число инициализируется нулём и является неотрицательным.";
+	ASSERT_EQ(1, x.get_digits_number())
+		<< "По умолчанию число инициализируется нулём и иметь один разряд единиц.";
+	ASSERT_EQ(0, x.get_rank_number(1))
+		<< "По умолчанию число инициализируется нулём.";
+}
+
+class FConstructor : public testing::Test {
+	public:
+		LongNumber 
+			vn{"-1234567890"}, vd, vp{"1234567890"}, 
+			vp_copy{vp}, vp_move{std::move(LongNumber("1234567890"))};
 };
 
-TEST_F(LongNumberFixture, equality) {
-    ASSERT_TRUE(one_v1 == one_v2) << "Проверка " << one_v1 << " == " << one_v2;
-    ASSERT_FALSE(one_v1 == twelve) << "Проверка " << one_v1 << " == " << twelve;
-    ASSERT_FALSE(one_v1 == negative_one_v1) << "Проверка " << one_v1 << " == " << negative_one_v1;
+TEST_F(FConstructor, str_positive) {
+	EXPECT_FALSE(vp.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, vp.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, vp.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, greater) {
-    ASSERT_TRUE(two > one_v1) << "Проверка " << two << " > " << one_v1;
-    ASSERT_FALSE(one_v1 > two) << "Проверка " << one_v1 << " > " << two;
-    ASSERT_FALSE(one_v1 > one_v1) << "Проверка " << one_v1 << " > " << one_v1;
-    ASSERT_FALSE(zero > one_v1) << "Проверка " << zero << " > " << one_v1;
-    //ASSERT_FALSE(negative_one_v1 > one_v1) << "Проверка " << negative_one_v1 << " > " << one_v1;
+TEST_F(FConstructor, str_negative) {
+	EXPECT_TRUE(vn.is_negative())
+		<< "Инициализировано число -1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, vn.get_digits_number())
+		<< "Инициализировано число -1234567890.";
+	EXPECT_EQ(8, vn.get_rank_number(3))
+		<< "Инициализировано число -1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, less) {
-    ASSERT_TRUE(one_v1 < two) << "Проверка " << one_v1 << " < " << two;
-    ASSERT_FALSE(two < one_v1) << "Проверка " << two << " < " << one_v1;
-    ASSERT_FALSE(one_v1 < one_v1) << "Проверка " << one_v1 << " < " << one_v1;
-    ASSERT_FALSE(one_v1 < zero) << "Проверка " << one_v1 << " < " << zero;
-    //ASSERT_FALSE(one_v1 < negative_one_v1) << "Проверка " << one_v1 << " < " << negative_one_v1;
+TEST_F(FConstructor, copy) {
+	EXPECT_FALSE(vp_copy.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, vp_copy.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, vp_copy.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, addition) {
-    VBek::LongNumber sum_v1 = one_v1 + two;
-    ASSERT_EQ(three, sum_v1);
-    ASSERT_FALSE(sum_v1.is_negative());
+TEST_F(FConstructor, move) {
+	EXPECT_FALSE(vp_move.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, vp_move.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, vp_move.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-//TEST_F(LongNumberFixture, addition_negative) {
-//    VBek::LongNumber nsum = two + negative_one_v1;
-//    ASSERT_EQ(one_v1, nsum);
-//    ASSERT_FALSE(nsum.is_negative());
-//}
-
-TEST_F(LongNumberFixture, addition_zero) {
-    VBek::LongNumber sum_v2 = zero + zero;
-    ASSERT_EQ(zero, sum_v2);
-}
-TEST_F(LongNumberFixture, addition_big) {
-    VBek::LongNumber sum_big = big_number + twelve;
-    ASSERT_EQ(VBek::LongNumber("123456789101112131427"), sum_big);
+TEST(assignment, str) {
+	LongNumber x;
+	x = "1234567890";
+	EXPECT_FALSE(x.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, x.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, x.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, subtraction_v1) {
-    VBek::LongNumber dif_v1 = one_v1 - two;
-    ASSERT_EQ(negative_one_v1, dif_v1);
-    ASSERT_TRUE(dif_v1.is_negative());
+TEST(assignment, copy) {
+	LongNumber x("1234567890");
+	LongNumber y;
+	y = x;
+	EXPECT_FALSE(y.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, y.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, y.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, subtraction_v2) {
-    VBek::LongNumber dif_v1 = five - two;
-    ASSERT_EQ(three, dif_v1);
-    ASSERT_FALSE(dif_v1.is_negative());
+TEST(assignment, move) {
+	LongNumber x;
+	x = LongNumber("1234567890");
+	EXPECT_FALSE(x.is_negative())
+		<< "Инициализировано число 1234567890. Оно неотрицательное.";
+	ASSERT_EQ(10, x.get_digits_number())
+		<< "Инициализировано число 1234567890.";
+	EXPECT_EQ(8, x.get_rank_number(3))
+		<< "Инициализировано число 1234567890. Третий разряд равен 8.";
 }
 
-TEST_F(LongNumberFixture, subtraction_v3) {
-    VBek::LongNumber dif_v2 = two - two;
-    ASSERT_EQ(zero, dif_v2);
+class FComparisons : public testing::Test {
+	public:
+		LongNumber 
+			n_2{"-2"}, n_1{"-1"}, n_1_copy{"-1"},
+			
+			p_1{"1"}, p_1_copy{"1"}, p_12{"12"};
+};
+
+TEST_F(FComparisons, equal) {
+	EXPECT_TRUE(p_1 == p_1_copy) << "EXPECT_TRUE: 1 == 1";
+	EXPECT_FALSE(n_1 == p_1) << "EXPECT_FALSE: -1 == 1";
+	EXPECT_FALSE(p_1 == p_12) << "EXPECT_FALSE: 1 == 12";
+	EXPECT_EQ(p_1, p_1_copy) << "EXPECT_EQ: 1 == 1";
+	EXPECT_EQ(n_1, n_1_copy) << "EXPECT_EQ: -1 == -1";
 }
 
-TEST_F(LongNumberFixture, subtraction_zero) {
-    VBek::LongNumber dif_v2 = zero - zero;
-    ASSERT_EQ(zero, dif_v2);
+TEST_F(FComparisons, not_equal) {
+	EXPECT_TRUE(n_1 != p_1) << "EXPECT_TRUE: -1 != 1";
+	EXPECT_TRUE(p_1 != p_12) << "EXPECT_TRUE: 1 != 12";
+	EXPECT_FALSE(p_1 != p_1_copy) << "EXPECT_FALSE: 1 == 1";
+	ASSERT_NE(p_1, p_12) << "ASSERT_NE: 1 != 12";
+	ASSERT_NE(n_1, p_1) << "ASSERT_NE: -1 != 1";
 }
 
-TEST_F(LongNumberFixture, subtraction_big) {
-    VBek::LongNumber dif_big = big_number - twelve;
-    ASSERT_EQ(VBek::LongNumber("123456789101112131403"), dif_big);
+TEST_F(FComparisons, more) {
+	EXPECT_TRUE(p_12 > p_1) << "12 > 1";
+	EXPECT_TRUE(p_1 > n_1) << "1 > -1";
+	EXPECT_TRUE(n_1 > n_2) << "-1 > -2";
+	EXPECT_FALSE(p_1_copy > p_1) << "1 > 1";
+	EXPECT_FALSE(p_1 > p_12) << "1 > 12";
 }
 
-TEST_F(LongNumberFixture, multiplication) {
-    VBek::LongNumber comp_v1 = one_v1 * two;
-    ASSERT_EQ(two, comp_v1);
-    ASSERT_FALSE(comp_v1.is_negative());
+TEST_F(FComparisons, less) {
+	EXPECT_TRUE(p_1 < p_12) << "1 < 12";
+	EXPECT_TRUE(n_1 < p_1) << "-1 < 1";
+	EXPECT_TRUE(n_2 < n_1) << "-2 < -1";
+	EXPECT_FALSE(p_1_copy < p_1) << "1 < 1";
+	EXPECT_FALSE(p_12 < p_1) << "12 < 1";
 }
 
-TEST_F(LongNumberFixture, multiplication_negative) {
-    VBek::LongNumber ncomp = two * negative_one_v1;
-    ASSERT_EQ(negative_two, ncomp);
-    ASSERT_TRUE(ncomp.is_negative());
+class FArithmetic : public testing::Test {
+	public:
+		LongNumber 
+			n_19602{"-19602"}, n_99{"-99"}, n_87{"-87"}, n_15{"-15"},
+			n_7{"-7"}, n_4{"-4"}, n_3{"-3"}, n_2{"-2"}, n_1{"-1"},
+		
+			p_0{"0"}, p_1{"1"}, p_1_copy{"1"}, p_2{"2"}, p_3{"3"},
+			p_4{"4"}, p_6{"6"}, p_12{"12"}, p_99{"99"}, p_99_copy{"99"}, 
+			p_113{"113"}, p_198{"198"}, p_1188{"1188"}, p_19602{"19602"},
+			
+			n_100{"-100"}, n_6{"-6"}, p_100{"100"}, p_{"6"};
+};
+
+TEST_F(FArithmetic, summ) {
+	EXPECT_EQ(p_2, p_1 + p_1_copy) << "1 + 1 = 2";
+	EXPECT_EQ(p_0, p_1 + n_1) << "1 + (-1) = 0";
+	EXPECT_EQ(p_198, p_99 + p_99_copy) << "99 + 99 = 198";	
+	EXPECT_EQ(n_87, n_99 + p_12) << "-99 + 12 = -87";	
+	EXPECT_EQ(n_87, p_12 + n_99) << "12 + (-99) = -87";	
 }
 
-TEST_F(LongNumberFixture, multiplication_zero) {
-    VBek::LongNumber comp_v2 = zero * one_v1;
-    ASSERT_EQ(zero, comp_v2);
+TEST_F(FArithmetic, substraction) {
+	EXPECT_EQ(p_0, p_1 - p_1_copy) << "1 - 1 = 0";
+	EXPECT_EQ(p_2, p_1 - n_1) << "1 + (-1) = 2";
+	EXPECT_EQ(n_87, p_12 - p_99) << "12 - 99 = -87";
 }
 
-TEST_F(LongNumberFixture, multiplication_big) {
-    VBek::LongNumber comp_big = big_number * two;
-    ASSERT_EQ(VBek::LongNumber("246913578202224262830"), comp_big);
+TEST_F(FArithmetic, multiply) {
+	EXPECT_EQ(p_1, p_1 * p_1_copy) << "1 * 1 = 1";
+	EXPECT_EQ(n_1, p_1 * n_1) << "1 * (-1) = -1";
+	EXPECT_EQ(p_0, p_0 * p_99) << "0 * 99 = 0";
+	EXPECT_EQ(p_1188, p_12 * p_99) << "12 * 99 = 1188";
+	EXPECT_EQ(n_19602, p_198 * p_99 * n_1) << "198 * 99 * -1 = -19602";
 }
 
-//TEST_F(LongNumberFixture, division) {
-//    VBek::LongNumber divisible(twelve);
-//    VBek::LongNumber divider(two);
-//    VBek::LongNumber priv_v1 = divisible / divider;
-//    ASSERT_EQ(six, priv_v1);
-//    ASSERT_FALSE(priv_v1.is_negative());
-//}
-//
-//TEST_F(LongNumberFixture, division_negative) {
-//    VBek::LongNumber npriv = two / negative_one_v1;
-//    ASSERT_EQ(negative_two, npriv);
-//    ASSERT_TRUE(npriv.is_negative());
-//}
-//
-//TEST_F(LongNumberFixture, division_zero_v1) {
-//    VBek::LongNumber priv_v2 = zero / two;
-//    ASSERT_EQ(zero, priv_v2);
-//}
-//
-//TEST_F(LongNumberFixture, division_big) {
-//    VBek::LongNumber priv_big = big_number / three;
-//    ASSERT_EQ(VBek::LongNumber("41152263033704043805"), priv_big);
-//}
+TEST_F(FArithmetic, division) {
+	EXPECT_EQ(p_2, p_2 / p_1) << "2 / 1 = 2";
+	EXPECT_EQ(p_198, p_19602 / p_99) << "19602 / 99 = 198";
+	EXPECT_EQ(p_99, n_19602 / p_198 / n_1) << "-19602 / 198 / -1  = 99";
+}
 
-//TEST_F(LongNumberFixture, remainder_of_division) {
-//    VBek::LongNumber divisible(twelve);
-//    VBek::LongNumber divider(five);
-//    VBek::LongNumber remains_v1 = divisible % divider;
-//    ASSERT_EQ(two, remains_v1);
-//    ASSERT_FALSE(remains_v1.is_negative());
-//}
-//
-//TEST_F(LongNumberFixture, remainder_of_division_negative) {
-//    VBek::LongNumber nremains = twelve % negative_five;
-//    ASSERT_EQ(two, nremains);
-//}
-//
-//TEST_F(LongNumberFixture, remainder_of_division_zero) {
-//    VBek::LongNumber remains_v2 = zero % five;
-//    ASSERT_EQ(zero, remains_v2);
-//}
-//
-////TEST_F(LongNumberFixture, remainder_of_division_big) {
-////    VBek::LongNumber remains_big = big_number % two;
-////    ASSERT_EQ(one_v1, remains_big);
-////}
+TEST_F(FArithmetic, remainder) {
+	EXPECT_EQ(p_1, p_3 % p_2) << "3 % 2 = 1";
+	EXPECT_EQ(p_6, p_19602 % p_12) << "19602 % 12 = 6";
+	EXPECT_EQ(p_1, n_15 % p_4) << "-15 % 4 = 1";
+	EXPECT_EQ(p_2, p_113 % n_3) << "113 % -3 = 2";
+	EXPECT_EQ(p_6, n_15 % n_7) << "-15 % -7 = 6";
+}
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+TEST_F(FArithmetic, remainder_full_sign_example) {
+	EXPECT_EQ(p_4, p_100 % p_6) << "100 % 6 = 4";
+	EXPECT_EQ(p_4, p_100 % n_6) << "100 % -6 = 4";
+	EXPECT_EQ(p_2, n_100 % p_6) << "-100 % 6 = 2";
+	EXPECT_EQ(p_2, n_100 % n_6) << "-100 % -6 = 2";
+}
+
+int main(int argc, char **argv) {
+	::testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }

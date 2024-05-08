@@ -1,1 +1,0 @@
-SCL - Standart Classes Library

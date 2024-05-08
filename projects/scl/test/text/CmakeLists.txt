@@ -1,0 +1,8 @@
+add_executable(text_tests test_text.cpp)
+
+target_link_libraries(text_tests 
+	gtest_main 
+	scl_lib
+)
+
+add_test(text_tests text_tests)
